@@ -1,76 +1,95 @@
-import React, {  useState } from 'react'
-import {auth,provider} from '../config/firebase'
-import { signInWithPopup, signOut } from 'firebase/auth'
-import { Room } from './Room';
-import  Cookies  from 'universal-cookie';
-const cookies=new Cookies()
+import React, { useState } from 'react'
 
-
-
+import { dataBase } from '../config/firebase'
+import { addDoc, collection, getDocs, updateDoc ,doc, deleteDoc} from 'firebase/firestore';
 
 
 export const Auth = () => {
-  
-   const [islogin,setIsLogin]=useState(cookies.get('kiwi'));
-   const [namee,setName]=useState(cookies.get('name'));
-  
-    const signInWithGoogle=async()=>{
-      const result=await signInWithPopup(auth,provider)
-      console.log(result.user.displayName);
+  const [namee,setNamee]=useState('')
+  const [age,setAge]=useState('');
+  const [info,setInfo]=useState([]);
 
-    //   cookies.set("auth-token",result.user.refreshToken)
-    //   setIsAuth(true)
-      
-      console.log(result)
-      cookies.set("kiwi",result.user.refreshToken)
-      console.log(result.user.refreshToken)
-
-      cookies.set('name',result.user.displayName);
-
-      setIsLogin(true)
-      setName(result.user.displayName)
-      
-
-    }
   
 
-    const signOutFromWebsite=async()=>{
-     await signOut(auth)
-     cookies.remove("kiwi");
+//  const connectionReference=collection(db,'users');
+//  const data={
+//   name:namee,
+//   age:age
+//  }`
+
+ const  addDataToDataBase=async()=>{
+   //    addDoc(connectionReference,data)
+  await addDoc(collection(dataBase,"users"),{
+    name:namee,
+    age:age
+  });
+  setNamee('');
+  setAge('');
+
+  getFirebaseData()
+ }
+
+
+
+
+const getFirebaseData=async()=>{
+  let data=await getDocs(collection(dataBase,"users"));
+   let filteredData=data.docs.map((document)=>({
+      ...document.data(),
+      id:document.id,
+ }))
+//  console.log(filteredData)
+setInfo(filteredData)
+}
+
+
+const updateData=async(idName)=>{
+  await updateDoc(doc(dataBase,"users",idName),{
+    name:"kiwi"
+  }) 
+  getFirebaseData();
   
-     cookies.remove('name');
+}
 
-     setIsLogin('')
-     setName('');  
-     
+const deleteData=async(idName)=>{
+  await deleteDoc(doc(dataBase,"users",idName))
+  getFirebaseData();
+}
 
 
-    }
 
-   
+
   return (
-    <div>
-        {console.log(islogin)}
-
-       {
-          islogin?
-          <>
-          <Room namee={namee}/>
-          <div>
-          <button onClick={signOutFromWebsite}>sign out</button>
-         </div>
-          </>:
-          <>
-        
-          <h1>sign in with google</h1>
-          <button onClick={signInWithGoogle}>sign in</button>
-          </>
-
-
-        }
-      
+    <>
+    Name:<input placeholder='enter ur name' onChange={(e)=>setNamee(e.target.value)}  value={namee}/>
+    <br/>
+    Age:<input placeholder='age' onChange={(e)=>setAge(e.target.value)} value={age} />
+    <br/>
+    <button onClick={addDataToDataBase}>create / write</button>
+    {/* <br/>
+    work:<input placeholder='enter ur  name of work' onChange={(e)=>setNamee(e.target.value)}/>
+    <br/>
+    Rating:<input placeholder='rating' onChange={(e)=>setAge(e.target.value)}/>
+    <br/>
+    <button onClick={addDataToDataBaseWorks}>create / write</button> */}
      
-   
-    </div>
+
+     <button onClick={getFirebaseData}>read</button>
+    {
+     info.map((obj)=>{
+      {console.log(obj)}
+      return <>
+                <h1>{obj.name}</h1>
+                <h1>{obj.age}</h1> 
+                <h1>{obj.id}</h1>
+                <button onClick={()=>updateData(obj.id)}>update</button>
+                <button onClick={()=>deleteData(obj.id)}>delete</button>
+                
+              </>
+     })
+
+
+    }
+    </>
   )
 }
