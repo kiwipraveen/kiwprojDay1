@@ -20,8 +20,6 @@ export const Chat = (props) => {
       orderBy("time")
       
     )
-
-    
    onSnapshot(eceMsg,(data)=>{
    let store=[];
 
@@ -31,11 +29,8 @@ export const Chat = (props) => {
    console.log(store);
    setDataa(store);
    })
-
-
   },[])
      
-  
   const prevv=()=>{
     setprev(true)
   }
@@ -49,17 +44,9 @@ export const Chat = (props) => {
     room:inputValue,
     user:auth.currentUser.displayName,
     time:serverTimestamp(),
-    
-
   })
   setMsg('')
-
  }
-
-
-
-
-
 
   return (
     <>
@@ -74,21 +61,11 @@ export const Chat = (props) => {
      }
     </div>
     <div>
-
-
-
        <form onSubmit={sentChat} >
-
-
-
-
        <input value={msg} onChange={(e)=>setMsg(e.target.value)} placeholder='type ur msg'/>
        <button type='submit' >send</button>
        </form>
     </div>
-  
-
-
     <button onClick={prevv} >prev</button> 
 
     </>
